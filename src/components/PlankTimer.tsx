@@ -11,6 +11,8 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [plankType, setPlankType] = useState<PlankType>('regular');
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
     const intervalRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -31,6 +33,15 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
             }
         };
     }, [isRunning]);
+
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
 
     const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
@@ -58,6 +69,11 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
 
     const handleQuickSave = (seconds: number) => {
         savePlankEntry(seconds, plankType);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        setToastMessage(`✓ Saved ${timeStr} plank!`);
+        setShowToast(true);
         onSave();
     };
 
@@ -153,6 +169,12 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
                     </button>
                 </div>
             </div>
+
+            {showToast && (
+                <div className="toast">
+                    {toastMessage}
+                </div>
+            )}
         </div>
     );
 }
