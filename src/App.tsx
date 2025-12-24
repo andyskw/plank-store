@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import PlankTimer from './components/PlankTimer';
+import PushupTracker from './components/PushupTracker';
 import Statistics from './components/Statistics';
 import './App.css';
 
-type View = 'timer' | 'stats';
+type View = 'timer' | 'pushups' | 'stats';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('timer');
@@ -26,7 +27,14 @@ function App() {
           onClick={() => setCurrentView('timer')}
         >
           <span className="nav-icon">⏱️</span>
-          <span className="nav-label">Timer</span>
+          <span className="nav-label">Plank</span>
+        </button>
+        <button
+          className={`nav-button ${currentView === 'pushups' ? 'active' : ''}`}
+          onClick={() => setCurrentView('pushups')}
+        >
+          <span className="nav-icon">💪</span>
+          <span className="nav-label">Pushups</span>
         </button>
         <button
           className={`nav-button ${currentView === 'stats' ? 'active' : ''}`}
@@ -40,6 +48,8 @@ function App() {
       <main className="app-main">
         {currentView === 'timer' ? (
           <PlankTimer onSave={handleSave} />
+        ) : currentView === 'pushups' ? (
+          <PushupTracker onSave={handleSave} />
         ) : (
           <Statistics refreshTrigger={refreshTrigger} />
         )}

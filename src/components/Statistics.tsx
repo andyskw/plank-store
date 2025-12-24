@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { PlankEntry } from '../types';
-import { getPlankEntries, getStatistics, deleteEntry } from '../services/storage';
+import type { ExerciseEntry } from '../types';
+import { getExerciseEntries, getStatistics, deleteEntry } from '../services/storage';
 import './Statistics.css';
 
 interface StatisticsProps {
@@ -8,7 +8,7 @@ interface StatisticsProps {
 }
 
 export default function Statistics({ refreshTrigger }: StatisticsProps) {
-    const [entries, setEntries] = useState<PlankEntry[]>([]);
+    const [entries, setEntries] = useState<ExerciseEntry[]>([]);
     const [stats, setStats] = useState(getStatistics());
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
     }, [refreshTrigger]);
 
     const loadData = () => {
-        const allEntries = getPlankEntries();
+        const allEntries = getExerciseEntries();
         setEntries(allEntries);
         setStats(getStatistics());
     };
@@ -134,13 +134,13 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                             >
                                 <div className="entry-main">
                                     <div className="entry-time-info">
-                                        <div className="entry-duration">{formatDuration(entry.duration)}</div>
+                                        <div className="entry-duration">{entry.exerciseType === 'plank' ? formatDuration(entry.value) : `${entry.value} reps`}</div>
                                         <div className="entry-date">
                                             {formatDate(entry.timestamp)} · {formatTime(entry.timestamp)}
                                         </div>
                                     </div>
-                                    <span className={`type-badge ${getTypeBadgeClass(entry.type)}`}>
-                                        {getTypeLabel(entry.type)}
+                                    <span className={`type-badge ${entry.exerciseType === 'plank' ? getTypeBadgeClass(entry.variant || '') : 'badge-pushup'}`}>
+                                        {entry.exerciseType === 'plank' ? getTypeLabel(entry.variant || '') : 'Pushup'}
                                     </span>
                                 </div>
                                 <button
