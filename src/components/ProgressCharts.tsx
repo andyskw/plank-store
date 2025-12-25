@@ -9,6 +9,7 @@ import {
     Legend,
     ResponsiveContainer,
     Scatter,
+    Cell,
 } from 'recharts';
 import type { DailyStat } from '../services/analytics';
 import type { ExerciseType } from '../types';
@@ -89,9 +90,22 @@ export default function ProgressCharts({ data, type }: ProgressChartsProps) {
                         dataKey="totalValue"
                         name={type === 'plank' ? "Total Duration" : "Total Reps"}
                         barSize={20}
-                        fill="var(--primary-color)"
                         radius={[4, 4, 0, 0]}
-                    />
+                    >
+                        {data.map((entry, index) => {
+                            const isToday = new Date(entry.date).toDateString() === new Date().toDateString();
+                            return (
+                                <Cell
+                                    key={`cell-${index}`}
+                                    fill="var(--primary-color)"
+                                    fillOpacity={isToday ? 0.3 : 1}
+                                    stroke={isToday ? "var(--primary-color)" : "none"}
+                                    strokeDasharray={isToday ? "5 5" : ""}
+                                    strokeWidth={isToday ? 2 : 0}
+                                />
+                            );
+                        })}
+                    </Bar>
                     <Line
                         yAxisId="left"
                         type="monotone"
