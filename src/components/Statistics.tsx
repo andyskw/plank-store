@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { ExerciseEntry } from '../types';
 import { getExerciseEntries, getStatistics, deleteEntry } from '../services/storage';
+import { getDailyStats } from '../services/analytics';
+import ProgressCharts from './ProgressCharts';
 import './Statistics.css';
 
 interface StatisticsProps {
@@ -10,6 +12,7 @@ interface StatisticsProps {
 export default function Statistics({ refreshTrigger }: StatisticsProps) {
     const [entries, setEntries] = useState<ExerciseEntry[]>([]);
     const [stats, setStats] = useState(getStatistics());
+    const [chartType, setChartType] = useState<'plank' | 'pushup'>('plank');
 
     useEffect(() => {
         loadData();
@@ -110,6 +113,30 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                     <span className="type-badge badge-forward">🤸 Forward Bend</span>
                     <span className="type-total">{formatDuration(stats.forwardBendTotal)}</span>
                 </div>
+            </div>
+
+            <div className="chart-section slide-up">
+                <div className="chart-header">
+                    <h3>Activity Trends</h3>
+                    <div className="chart-toggles">
+                        <button
+                            className={`chart-toggle ${chartType === 'plank' ? 'active' : ''}`}
+                            onClick={() => setChartType('plank')}
+                        >
+                            Planks
+                        </button>
+                        <button
+                            className={`chart-toggle ${chartType === 'pushup' ? 'active' : ''}`}
+                            onClick={() => setChartType('pushup')}
+                        >
+                            Pushups
+                        </button>
+                    </div>
+                </div>
+                <ProgressCharts
+                    data={getDailyStats(entries, chartType)}
+                    type={chartType}
+                />
             </div>
 
             <div className="history-section">
