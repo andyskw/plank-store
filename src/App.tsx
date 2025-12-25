@@ -46,13 +46,15 @@ function App() {
       </nav>
 
       <main className="app-main">
-        {currentView === 'timer' ? (
+        <div className={`view-container ${currentView === 'timer' ? '' : 'hidden'}`}>
           <PlankTimer onSave={handleSave} />
-        ) : currentView === 'pushups' ? (
+        </div>
+        <div className={`view-container ${currentView === 'pushups' ? '' : 'hidden'}`}>
           <PushupTracker onSave={handleSave} />
-        ) : (
+        </div>
+        <div className={`view-container ${currentView === 'stats' ? '' : 'hidden'}`}>
           <Statistics refreshTrigger={refreshTrigger} />
-        )}
+        </div>
       </main>
     </div>
   );
