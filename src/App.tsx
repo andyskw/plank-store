@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PlankTimer from './components/PlankTimer';
 import PushupTracker from './components/PushupTracker';
 import Statistics from './components/Statistics';
@@ -9,6 +9,15 @@ type View = 'timer' | 'pushups' | 'stats';
 function App() {
   const [currentView, setCurrentView] = useState<View>('timer');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    // Set loaded state after initial animations complete
+    const timer = setTimeout(() => {
+      setHasLoaded(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSave = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -20,7 +29,7 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${hasLoaded ? 'app-loaded' : ''}`}>
       <nav className="app-nav">
         <button
           className={`nav-button ${currentView === 'timer' ? 'active' : ''}`}
