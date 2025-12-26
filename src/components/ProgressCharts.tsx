@@ -92,19 +92,16 @@ export default function ProgressCharts({ data, type }: ProgressChartsProps) {
                         barSize={20}
                         radius={[4, 4, 0, 0]}
                     >
-                        {data.map((entry, index) => {
-                            const isToday = new Date(entry.date).toDateString() === new Date().toDateString();
-                            return (
-                                <Cell
-                                    key={`cell-${index}`}
-                                    fill="var(--primary-color)"
-                                    fillOpacity={isToday ? 0.3 : 1}
-                                    stroke={isToday ? "var(--primary-color)" : "none"}
-                                    strokeDasharray={isToday ? "5 5" : ""}
-                                    strokeWidth={isToday ? 2 : 0}
-                                />
-                            );
-                        })}
+                        {data.map((entry, index) => (
+                            <Cell
+                                key={`cell-${index}`}
+                                fill="var(--primary-color)"
+                                fillOpacity={entry.isToday ? 0.3 : 1}
+                                stroke={entry.isToday ? "var(--primary-color)" : "none"}
+                                strokeDasharray={entry.isToday ? "5 5" : ""}
+                                strokeWidth={entry.isToday ? 2 : 0}
+                            />
+                        ))}
                     </Bar>
                     <Line
                         yAxisId="left"
