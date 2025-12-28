@@ -13,13 +13,17 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
     const [plankType, setPlankType] = useState<PlankType>('regular');
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [accumulatedTime, setAccumulatedTime] = useState(0);
     const intervalRef = useRef<number | null>(null);
 
     useEffect(() => {
-        if (isRunning) {
+        if (isRunning && startTime !== null) {
             intervalRef.current = window.setInterval(() => {
-                setTime(t => t + 1);
-            }, 1000);
+                const now = Date.now();
+                const totalMs = accumulatedTime + (now - startTime);
+                setTime(Math.floor(totalMs / 1000));
+            }, 100);
         } else {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -32,7 +36,7 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
                 clearInterval(intervalRef.current);
             }
         };
-    }, [isRunning]);
+    }, [isRunning, startTime, accumulatedTime]);
 
     useEffect(() => {
         if (showToast) {
@@ -50,19 +54,42 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
     };
 
     const handleStartStop = () => {
-        setIsRunning(!isRunning);
+        if (isRunning) {
+            // Stopping
+            if (startTime) {
+                const now = Date.now();
+                setAccumulatedTime(prev => prev + (now - startTime));
+                setStartTime(null);
+            }
+            setIsRunning(false);
+        } else {
+            // Starting
+            setStartTime(Date.now());
+            setIsRunning(true);
+        }
     };
 
     const handleReset = () => {
         setIsRunning(false);
         setTime(0);
+        setStartTime(null);
+        setAccumulatedTime(0);
     };
 
     const handleSave = () => {
-        if (time > 0) {
-            savePlankEntry(time, plankType);
-            setTime(0);
-            setIsRunning(false);
+        // Calculate final time to be precise
+        let finalSeconds = time;
+        if (isRunning && startTime) {
+            const now = Date.now();
+            const totalMs = accumulatedTime + (now - startTime);
+            finalSeconds = Math.floor(totalMs / 1000);
+        } else {
+            finalSeconds = Math.floor(accumulatedTime / 1000);
+        }
+
+        if (finalSeconds > 0) {
+            savePlankEntry(finalSeconds, plankType);
+            handleReset();
             onSave();
         }
     };
