@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { savePushupEntry } from '../services/storage';
+import type { PushupVariant } from '../types';
 import './PushupTracker.css';
 
 interface PushupTrackerProps {
@@ -8,6 +9,7 @@ interface PushupTrackerProps {
 
 export default function PushupTracker({ onSave }: PushupTrackerProps) {
     const [count, setCount] = useState(0);
+    const [variant, setVariant] = useState<PushupVariant>('regular');
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
@@ -34,8 +36,8 @@ export default function PushupTracker({ onSave }: PushupTrackerProps) {
 
     const handleSave = () => {
         if (count > 0) {
-            savePushupEntry(count);
-            setToastMessage(`✓ Saved ${count} pushups!`);
+            savePushupEntry(count, variant);
+            setToastMessage(`✓ Saved ${count} ${variant} pushups!`);
             setShowToast(true);
             setCount(0);
             onSave();
@@ -43,8 +45,8 @@ export default function PushupTracker({ onSave }: PushupTrackerProps) {
     };
 
     const handleQuickSave = (reps: number) => {
-        savePushupEntry(reps);
-        setToastMessage(`✓ Saved ${reps} pushups!`);
+        savePushupEntry(reps, variant);
+        setToastMessage(`✓ Saved ${reps} ${variant} pushups!`);
         setShowToast(true);
         onSave();
     };
@@ -58,7 +60,28 @@ export default function PushupTracker({ onSave }: PushupTrackerProps) {
 
             <div className="counter-display scale-in">
                 <div className="count-text">{count}</div>
-                <div className="count-label">pushups</div>
+                <div className="count-label">{variant} pushups</div>
+            </div>
+
+            <div className="variant-selector slide-up">
+                <button
+                    className={`variant-option ${variant === 'regular' ? 'active' : ''}`}
+                    onClick={() => setVariant('regular')}
+                >
+                    Regular
+                </button>
+                <button
+                    className={`variant-option ${variant === 'diamond' ? 'active' : ''}`}
+                    onClick={() => setVariant('diamond')}
+                >
+                    Diamond
+                </button>
+                <button
+                    className={`variant-option ${variant === 'knee' ? 'active' : ''}`}
+                    onClick={() => setVariant('knee')}
+                >
+                    Knee
+                </button>
             </div>
 
             <div className="counter-controls slide-up">

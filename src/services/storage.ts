@@ -1,4 +1,4 @@
-import type { ExerciseEntry, PlankVariant, Statistics } from '../types';
+import type { ExerciseEntry, PlankVariant, PushupVariant, Statistics } from '../types';
 
 const STORAGE_KEY = 'exercise_entries';
 const OLD_STORAGE_KEY = 'plank_entries';
@@ -39,13 +39,14 @@ export const savePlankEntry = (duration: number, variant: PlankVariant): Exercis
     return newEntry;
 };
 
-export const savePushupEntry = (reps: number): ExerciseEntry => {
+export const savePushupEntry = (reps: number, variant: PushupVariant = 'regular'): ExerciseEntry => {
     const entries = getExerciseEntries();
     const newEntry: ExerciseEntry = {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
         exerciseType: 'pushup',
         value: reps,
+        variant,
     };
 
     entries.unshift(newEntry);
@@ -72,6 +73,13 @@ export const getPlankEntries = (): ExerciseEntry[] => {
 
 export const deleteEntry = (id: string): void => {
     const entries = getExerciseEntries().filter(entry => entry.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+};
+
+export const updateEntry = (updatedEntry: ExerciseEntry): void => {
+    const entries = getExerciseEntries().map(entry =>
+        entry.id === updatedEntry.id ? updatedEntry : entry
+    );
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 };
 
@@ -162,6 +170,18 @@ export const getStatistics = (): Statistics => {
         totalPushupReps = pushupEntries.reduce((sum, e) => sum + e.value, 0);
     }
 
+    const regularPushupTotal = pushupEntries
+        .filter(e => e.variant === 'regular' || !e.variant)
+        .reduce((sum, e) => sum + e.value, 0);
+
+    const diamondPushupTotal = pushupEntries
+        .filter(e => e.variant === 'diamond')
+        .reduce((sum, e) => sum + e.value, 0);
+
+    const kneePushupTotal = pushupEntries
+        .filter(e => e.variant === 'knee')
+        .reduce((sum, e) => sum + e.value, 0);
+
     return {
         todayTotal,
         weeklyAverage,
@@ -175,5 +195,8 @@ export const getStatistics = (): Statistics => {
         personalBestPushups,
         totalPushups: pushupEntries.length,
         totalPushupReps,
+        regularPushupTotal,
+        diamondPushupTotal,
+        kneePushupTotal,
     };
 };

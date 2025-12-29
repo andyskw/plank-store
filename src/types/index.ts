@@ -3,14 +3,17 @@ export type PlankVariant = 'regular' | 'forward-bend';
 // Backward compatibility
 export type PlankType = PlankVariant;
 
+
+export type PushupVariant = 'regular' | 'diamond' | 'knee';
+
 export interface ExerciseEntry {
   id: string;
   timestamp: number;
   exerciseType: ExerciseType;
   // For planks: duration in seconds; For pushups: number of reps
   value: number;
-  // Only used for planks
-  variant?: PlankVariant;
+  // Variant for either plank or pushup
+  variant?: PlankVariant | PushupVariant;
 }
 
 // Backward compatibility
@@ -32,4 +35,7 @@ export interface Statistics {
   personalBestPushups: number;
   totalPushups: number;
   totalPushupReps: number;
+  regularPushupTotal: number;
+  diamondPushupTotal: number;
+  kneePushupTotal: number;
 }

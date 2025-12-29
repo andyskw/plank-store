@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import type { ExerciseEntry } from '../types';
-import { getExerciseEntries, getStatistics, deleteEntry } from '../services/storage';
+import type { ExerciseEntry, PlankVariant, PushupVariant } from '../types';
+import { getExerciseEntries, getStatistics, deleteEntry, updateEntry } from '../services/storage';
 import { getDailyStats } from '../services/analytics';
+import EditEntryModal from './EditEntryModal';
 import ProgressCharts from './ProgressCharts';
 import './Statistics.css';
 
@@ -13,6 +14,9 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
     const [entries, setEntries] = useState<ExerciseEntry[]>([]);
     const [stats, setStats] = useState(getStatistics());
     const [chartType, setChartType] = useState<'plank' | 'pushup'>('plank');
+    const [plankFilters, setPlankFilters] = useState<PlankVariant[]>(['regular', 'forward-bend']);
+    const [pushupFilters, setPushupFilters] = useState<PushupVariant[]>(['regular', 'diamond', 'knee']);
+    const [editingEntry, setEditingEntry] = useState<ExerciseEntry | null>(null);
 
     useEffect(() => {
         loadData();
@@ -63,12 +67,28 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
         }
     };
 
+    const handleUpdateEntry = (updatedEntry: ExerciseEntry) => {
+        updateEntry(updatedEntry);
+        setEditingEntry(null);
+        loadData();
+    };
+
     const getTypeBadgeClass = (type: string) => {
-        return type === 'regular' ? 'badge-regular' : 'badge-forward';
+        if (type === 'regular') return 'badge-regular';
+        if (type === 'forward-bend') return 'badge-forward';
+        if (type === 'diamond') return 'badge-diamond';
+        if (type === 'knee') return 'badge-knee';
+        return 'badge-regular';
     };
 
     const getTypeLabel = (type: string) => {
-        return type === 'regular' ? 'Regular' : 'Forward Bend';
+        switch (type) {
+            case 'regular': return 'Regular';
+            case 'forward-bend': return 'Forward Bend';
+            case 'diamond': return 'Diamond';
+            case 'knee': return 'Knee';
+            default: return type;
+        }
     };
 
     return (
@@ -105,14 +125,33 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
             </div>
 
             <div className="type-stats slide-up">
-                <div className="type-stat">
-                    <span className="type-badge badge-regular">🏋️ Regular</span>
-                    <span className="type-total">{formatDuration(stats.regularTotal)}</span>
-                </div>
-                <div className="type-stat">
-                    <span className="type-badge badge-forward">🤸 Forward Bend</span>
-                    <span className="type-total">{formatDuration(stats.forwardBendTotal)}</span>
-                </div>
+                {chartType === 'plank' ? (
+                    <>
+                        <div className="type-stat">
+                            <span className="type-badge badge-regular">🏋️ Regular</span>
+                            <span className="type-total">{formatDuration(stats.regularTotal)}</span>
+                        </div>
+                        <div className="type-stat">
+                            <span className="type-badge badge-forward">🤸 Forward Bend</span>
+                            <span className="type-total">{formatDuration(stats.forwardBendTotal)}</span>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="type-stat">
+                            <span className="type-badge badge-regular">💪 Regular</span>
+                            <span className="type-total">{stats.regularPushupTotal}</span>
+                        </div>
+                        <div className="type-stat">
+                            <span className="type-badge badge-diamond">💎 Diamond</span>
+                            <span className="type-total">{stats.diamondPushupTotal}</span>
+                        </div>
+                        <div className="type-stat">
+                            <span className="type-badge badge-knee">🦵 Knee</span>
+                            <span className="type-total">{stats.kneePushupTotal}</span>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="chart-section slide-up">
@@ -133,8 +172,81 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                         </button>
                     </div>
                 </div>
+                <div className="filter-controls">
+                    {chartType === 'plank' ? (
+                        <>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={plankFilters.includes('regular')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPlankFilters([...plankFilters, 'regular']);
+                                        else setPlankFilters(plankFilters.filter(f => f !== 'regular'));
+                                    }}
+                                />
+                                Regular
+                            </label>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={plankFilters.includes('forward-bend')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPlankFilters([...plankFilters, 'forward-bend']);
+                                        else setPlankFilters(plankFilters.filter(f => f !== 'forward-bend'));
+                                    }}
+                                />
+                                Forward Bend
+                            </label>
+                        </>
+                    ) : (
+                        <>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={pushupFilters.includes('regular')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPushupFilters([...pushupFilters, 'regular']);
+                                        else setPushupFilters(pushupFilters.filter(f => f !== 'regular'));
+                                    }}
+                                />
+                                Regular
+                            </label>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={pushupFilters.includes('diamond')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPushupFilters([...pushupFilters, 'diamond']);
+                                        else setPushupFilters(pushupFilters.filter(f => f !== 'diamond'));
+                                    }}
+                                />
+                                Diamond
+                            </label>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={pushupFilters.includes('knee')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPushupFilters([...pushupFilters, 'knee']);
+                                        else setPushupFilters(pushupFilters.filter(f => f !== 'knee'));
+                                    }}
+                                />
+                                Knee
+                            </label>
+                        </>
+                    )}
+                </div>
                 <ProgressCharts
-                    data={getDailyStats(entries, chartType)}
+                    data={getDailyStats(
+                        entries.filter(e => {
+                            if (chartType === 'plank') {
+                                return e.exerciseType === 'plank' && plankFilters.includes(e.variant as PlankVariant);
+                            } else {
+                                return e.exerciseType === 'pushup' && pushupFilters.includes((e.variant as PushupVariant) || 'regular');
+                            }
+                        }),
+                        chartType
+                    )}
                     type={chartType}
                 />
             </div>
@@ -166,22 +278,39 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                                             {formatDate(entry.timestamp)} · {formatTime(entry.timestamp)}
                                         </div>
                                     </div>
-                                    <span className={`type-badge ${entry.exerciseType === 'plank' ? getTypeBadgeClass(entry.variant || '') : 'badge-pushup'}`}>
-                                        {entry.exerciseType === 'plank' ? getTypeLabel(entry.variant || '') : 'Pushup'}
+                                    <span className={`type-badge ${getTypeBadgeClass(entry.variant || 'regular')}`}>
+                                        {getTypeLabel(entry.variant || 'regular')}
                                     </span>
                                 </div>
-                                <button
-                                    className="delete-button"
-                                    onClick={() => handleDelete(entry.id)}
-                                    aria-label="Delete entry"
-                                >
-                                    ×
-                                </button>
+                                <div className="entry-actions">
+                                    <button
+                                        className="edit-button"
+                                        onClick={() => setEditingEntry(entry)}
+                                        aria-label="Edit entry"
+                                    >
+                                        ✎
+                                    </button>
+                                    <button
+                                        className="delete-button"
+                                        onClick={() => handleDelete(entry.id)}
+                                        aria-label="Delete entry"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
                             </div>
                         ))
                     )}
                 </div>
             </div>
+
+            {editingEntry && (
+                <EditEntryModal
+                    entry={editingEntry}
+                    onSave={handleUpdateEntry}
+                    onCancel={() => setEditingEntry(null)}
+                />
+            )}
         </div>
     );
 }
