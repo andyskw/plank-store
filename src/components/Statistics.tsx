@@ -14,7 +14,7 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
     const [entries, setEntries] = useState<ExerciseEntry[]>([]);
     const [stats, setStats] = useState(getStatistics());
     const [chartType, setChartType] = useState<'plank' | 'pushup'>('plank');
-    const [plankFilters, setPlankFilters] = useState<PlankVariant[]>(['regular', 'forward-bend']);
+    const [plankFilters, setPlankFilters] = useState<PlankVariant[]>(['regular', 'forward-bend', 'one-side']);
     const [pushupFilters, setPushupFilters] = useState<PushupVariant[]>(['regular', 'diamond', 'knee']);
     const [editingEntry, setEditingEntry] = useState<ExerciseEntry | null>(null);
 
@@ -76,6 +76,7 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
     const getTypeBadgeClass = (type: string) => {
         if (type === 'regular') return 'badge-regular';
         if (type === 'forward-bend') return 'badge-forward';
+        if (type === 'one-side') return 'badge-one-side';
         if (type === 'diamond') return 'badge-diamond';
         if (type === 'knee') return 'badge-knee';
         return 'badge-regular';
@@ -85,6 +86,7 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
         switch (type) {
             case 'regular': return 'Regular';
             case 'forward-bend': return 'Forward Bend';
+            case 'one-side': return 'One-Side';
             case 'diamond': return 'Diamond';
             case 'knee': return 'Knee';
             default: return type;
@@ -129,26 +131,48 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                     <>
                         <div className="type-stat">
                             <span className="type-badge badge-regular">🏋️ Regular</span>
-                            <span className="type-total">{formatDuration(stats.regularTotal)}</span>
+                            <div className="stat-values">
+                                <span className="type-total">{formatDuration(stats.regularTotal)}</span>
+                                <span className="yesterday-stat">Yesterday: {formatDuration(stats.regularYesterday)}</span>
+                            </div>
                         </div>
                         <div className="type-stat">
                             <span className="type-badge badge-forward">🤸 Forward Bend</span>
-                            <span className="type-total">{formatDuration(stats.forwardBendTotal)}</span>
+                            <div className="stat-values">
+                                <span className="type-total">{formatDuration(stats.forwardBendTotal)}</span>
+                                <span className="yesterday-stat">Yesterday: {formatDuration(stats.forwardBendYesterday)}</span>
+                            </div>
+                        </div>
+                        <div className="type-stat">
+                            <span className="type-badge badge-one-side">⚖️ One-Side</span>
+                            <div className="stat-values">
+                                <span className="type-total">{formatDuration(stats.oneSideTotal)}</span>
+                                <span className="yesterday-stat">Yesterday: {formatDuration(stats.oneSideYesterday)}</span>
+                            </div>
                         </div>
                     </>
                 ) : (
                     <>
                         <div className="type-stat">
                             <span className="type-badge badge-regular">💪 Regular</span>
-                            <span className="type-total">{stats.regularPushupTotal}</span>
+                            <div className="stat-values">
+                                <span className="type-total">{stats.regularPushupTotal}</span>
+                                <span className="yesterday-stat">Yesterday: {stats.regularPushupYesterday}</span>
+                            </div>
                         </div>
                         <div className="type-stat">
                             <span className="type-badge badge-diamond">💎 Diamond</span>
-                            <span className="type-total">{stats.diamondPushupTotal}</span>
+                            <div className="stat-values">
+                                <span className="type-total">{stats.diamondPushupTotal}</span>
+                                <span className="yesterday-stat">Yesterday: {stats.diamondPushupYesterday}</span>
+                            </div>
                         </div>
                         <div className="type-stat">
                             <span className="type-badge badge-knee">🦵 Knee</span>
-                            <span className="type-total">{stats.kneePushupTotal}</span>
+                            <div className="stat-values">
+                                <span className="type-total">{stats.kneePushupTotal}</span>
+                                <span className="yesterday-stat">Yesterday: {stats.kneePushupYesterday}</span>
+                            </div>
                         </div>
                     </>
                 )}
@@ -196,6 +220,17 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                                     }}
                                 />
                                 Forward Bend
+                            </label>
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={plankFilters.includes('one-side')}
+                                    onChange={(e) => {
+                                        if (e.target.checked) setPlankFilters([...plankFilters, 'one-side']);
+                                        else setPlankFilters(plankFilters.filter(f => f !== 'one-side'));
+                                    }}
+                                />
+                                One-Side
                             </label>
                         </>
                     ) : (
@@ -280,6 +315,7 @@ export default function Statistics({ refreshTrigger }: StatisticsProps) {
                                     </div>
                                     <span className={`type-badge ${getTypeBadgeClass(entry.variant || 'regular')}`}>
                                         {getTypeLabel(entry.variant || 'regular')}
+                                        {entry.side && <span className="side-tag">({entry.side})</span>}
                                     </span>
                                 </div>
                                 <div className="entry-actions">

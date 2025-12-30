@@ -64,6 +64,43 @@
     background: var(--color-forward);
 }
 
+.type-button.active.one-side {
+    background: #eab308;
+    /* Yellow/Amber for one-side */
+}
+
+.side-selector {
+    display: flex;
+    gap: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-lg);
+    margin-top: -12px;
+    /* Pull closer to type selector */
+}
+
+.side-button {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.side-button:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.side-button.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+}
+
 .type-icon {
     font-size: 1.5rem;
 }

@@ -89,23 +89,43 @@
 
 .type-stat {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 4px;
+    padding: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-md);
+}
+
+.stat-values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.yesterday-stat {
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
 }
 
 .type-badge {
-    font-size: 0.75rem;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
+.side-tag {
+    opacity: 0.8;
+    margin-left: 6px;
+    font-weight: 400;
+}
+
 .badge-regular {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
+    color: #a855f7;
+    background: rgba(168, 85, 247, 0.1);
 }
 
 .badge-forward {

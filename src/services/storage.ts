@@ -23,7 +23,7 @@ const migrateOldEntries = (): void => {
     }
 };
 
-export const savePlankEntry = (duration: number, variant: PlankVariant): ExerciseEntry => {
+export const savePlankEntry = (duration: number, variant: PlankVariant, side?: 'left' | 'right'): ExerciseEntry => {
     const entries = getExerciseEntries();
     const newEntry: ExerciseEntry = {
         id: crypto.randomUUID(),
@@ -31,6 +31,7 @@ export const savePlankEntry = (duration: number, variant: PlankVariant): Exercis
         exerciseType: 'plank',
         value: duration,
         variant,
+        side,
     };
 
     entries.unshift(newEntry);
@@ -100,6 +101,11 @@ export const getStatistics = (): Statistics => {
     let currentStreak = 0;
     let regularTotal = 0;
     let forwardBendTotal = 0;
+    let oneSideTotal = 0;
+
+    let regularYesterday = 0;
+    let forwardBendYesterday = 0;
+    let oneSideYesterday = 0;
 
     if (plankEntries.length > 0) {
         // Today's total
@@ -148,6 +154,33 @@ export const getStatistics = (): Statistics => {
         forwardBendTotal = plankEntries
             .filter(e => e.variant === 'forward-bend')
             .reduce((sum, e) => sum + e.value, 0);
+
+        oneSideTotal = plankEntries
+            .filter(e => e.variant === 'one-side')
+            .reduce((sum, e) => sum + e.value, 0);
+
+        // Yesterday's stats
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        const yesterdayStart = yesterday.getTime();
+        const yesterdayEnd = yesterdayStart + oneDayMs;
+
+        const yesterdayPlanks = plankEntries.filter(e =>
+            e.timestamp >= yesterdayStart && e.timestamp < yesterdayEnd
+        );
+
+        regularYesterday = yesterdayPlanks
+            .filter(e => e.variant === 'regular')
+            .reduce((sum, e) => sum + e.value, 0);
+
+        forwardBendYesterday = yesterdayPlanks
+            .filter(e => e.variant === 'forward-bend')
+            .reduce((sum, e) => sum + e.value, 0);
+
+        oneSideYesterday = yesterdayPlanks
+            .filter(e => e.variant === 'one-side')
+            .reduce((sum, e) => sum + e.value, 0);
     }
 
     // Pushup statistics
@@ -155,6 +188,10 @@ export const getStatistics = (): Statistics => {
     let weeklyPushupAverage = 0;
     let personalBestPushups = 0;
     let totalPushupReps = 0;
+
+    let regularPushupYesterday = 0;
+    let diamondPushupYesterday = 0;
+    let kneePushupYesterday = 0;
 
     if (pushupEntries.length > 0) {
         const todayPushupEntries = pushupEntries.filter(e => e.timestamp >= todayStart);
@@ -182,6 +219,29 @@ export const getStatistics = (): Statistics => {
         .filter(e => e.variant === 'knee')
         .reduce((sum, e) => sum + e.value, 0);
 
+    // Yesterday's pushup stats
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    const yesterdayStart = yesterday.getTime();
+    const yesterdayEnd = yesterdayStart + oneDayMs;
+
+    const yesterdayPushups = pushupEntries.filter(e =>
+        e.timestamp >= yesterdayStart && e.timestamp < yesterdayEnd
+    );
+
+    regularPushupYesterday = yesterdayPushups
+        .filter(e => e.variant === 'regular' || !e.variant)
+        .reduce((sum, e) => sum + e.value, 0);
+
+    diamondPushupYesterday = yesterdayPushups
+        .filter(e => e.variant === 'diamond')
+        .reduce((sum, e) => sum + e.value, 0);
+
+    kneePushupYesterday = yesterdayPushups
+        .filter(e => e.variant === 'knee')
+        .reduce((sum, e) => sum + e.value, 0);
+
     return {
         todayTotal,
         weeklyAverage,
@@ -198,5 +258,12 @@ export const getStatistics = (): Statistics => {
         regularPushupTotal,
         diamondPushupTotal,
         kneePushupTotal,
+        oneSideTotal,
+        regularYesterday,
+        forwardBendYesterday,
+        oneSideYesterday,
+        regularPushupYesterday,
+        diamondPushupYesterday,
+        kneePushupYesterday,
     };
 };

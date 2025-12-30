@@ -1,5 +1,5 @@
 export type ExerciseType = 'plank' | 'pushup';
-export type PlankVariant = 'regular' | 'forward-bend';
+export type PlankVariant = 'regular' | 'forward-bend' | 'one-side';
 // Backward compatibility
 export type PlankType = PlankVariant;
 
@@ -14,6 +14,8 @@ export interface ExerciseEntry {
   value: number;
   // Variant for either plank or pushup
   variant?: PlankVariant | PushupVariant;
+  // For one-side planks
+  side?: 'left' | 'right';
 }
 
 // Backward compatibility
@@ -28,6 +30,12 @@ export interface Statistics {
   totalPlanks: number;
   regularTotal: number;
   forwardBendTotal: number;
+  oneSideTotal: number;
+
+  // Yesterday's stats
+  regularYesterday: number;
+  forwardBendYesterday: number;
+  oneSideYesterday: number;
 
   // Pushup stats
   todayPushups: number;
@@ -38,4 +46,8 @@ export interface Statistics {
   regularPushupTotal: number;
   diamondPushupTotal: number;
   kneePushupTotal: number;
+
+  regularPushupYesterday: number;
+  diamondPushupYesterday: number;
+  kneePushupYesterday: number;
 }

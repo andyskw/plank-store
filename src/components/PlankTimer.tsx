@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { PlankType } from '../types';
+import type { PlankVariant } from '../types';
 import { savePlankEntry } from '../services/storage';
 import './PlankTimer.css';
 
@@ -10,7 +10,8 @@ interface PlankTimerProps {
 export default function PlankTimer({ onSave }: PlankTimerProps) {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
-    const [plankType, setPlankType] = useState<PlankType>('regular');
+    const [plankType, setPlankType] = useState<PlankVariant>('regular');
+    const [side, setSide] = useState<'left' | 'right'>('left');
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [startTime, setStartTime] = useState<number | null>(null);
@@ -88,18 +89,19 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
         }
 
         if (finalSeconds > 0) {
-            savePlankEntry(finalSeconds, plankType);
+            savePlankEntry(finalSeconds, plankType, plankType === 'one-side' ? side : undefined);
             handleReset();
             onSave();
         }
     };
 
     const handleQuickSave = (seconds: number) => {
-        savePlankEntry(seconds, plankType);
+        savePlankEntry(seconds, plankType, plankType === 'one-side' ? side : undefined);
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-        setToastMessage(`✓ Saved ${timeStr} plank!`);
+        const typeStr = plankType === 'one-side' ? `one-side (${side})` : plankType;
+        setToastMessage(`✓ Saved ${timeStr} ${typeStr} plank!`);
         setShowToast(true);
         onSave();
     };
@@ -126,7 +128,31 @@ export default function PlankTimer({ onSave }: PlankTimerProps) {
                     <span className="type-icon">🤸</span>
                     <span>Forward Bend</span>
                 </button>
+                <button
+                    className={`type-button ${plankType === 'one-side' ? 'active one-side' : ''}`}
+                    onClick={() => setPlankType('one-side')}
+                >
+                    <span className="type-icon">⚖️</span>
+                    <span>One-Side</span>
+                </button>
             </div>
+
+            {plankType === 'one-side' && (
+                <div className="side-selector fade-in">
+                    <button
+                        className={`side-button ${side === 'left' ? 'active' : ''}`}
+                        onClick={() => setSide('left')}
+                    >
+                        Left Side
+                    </button>
+                    <button
+                        className={`side-button ${side === 'right' ? 'active' : ''}`}
+                        onClick={() => setSide('right')}
+                    >
+                        Right Side
+                    </button>
+                </div>
+            )}
 
             <div className={`timer-display scale-in ${isRunning ? 'running' : ''}`}>
                 <div className="time-text">{formatTime(time)}</div>
